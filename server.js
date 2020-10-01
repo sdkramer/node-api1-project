@@ -14,7 +14,15 @@ server.get('/', (req, res) => {
 
 server.get("/users", (req, res) => {
   const users = db.getUsers()
-  res.json(users)
+
+  if(users) {
+    res.json(users)
+  } else {
+    res.status(500).json({ 
+      message: "The users information could not be retrieved."
+    })
+  }
+  
 })
 
 server.get("/users/:id", (req, res) => {
@@ -24,17 +32,32 @@ server.get("/users/:id", (req, res) => {
   if(user) {
     res.json(user)
   } else {
-    res.status(404).json({message: "User not found"})
+    res.status(404).json({message: "The user with the specified ID does not exist."})
   }
 })
 
 server.post("/users", (req, res) => {
-  const newUser = db.createUser({
-    name: req.body.name,
-    bio: req.body.bio
-  })
-  res.json(201).json(newUser)
+
+  if(req.body.name && req.body.bio) {
+      const newUser = db.createUser({
+        name: req.body.name,
+        bio: req.body.bio
+      })
+      res.json(201).json(newUser)
+    } else {
+      res.status(400).json({ message: "Please provide name and bio for the user"})
+    }
+  
 })
+
+// server.post("/users", (req,res) => {
+//   const newUser = db.createUser({
+//     name: req.body.name,
+//     bio: req.body.bio
+//   })
+
+//   res.json(201).json(newUser)
+// })
 
 
 server.put("/users/:id", (req, res) => {
@@ -46,7 +69,7 @@ server.put("/users/:id", (req, res) => {
       name: req.body.name,
       bio: req.body.bio
     })
-    res.json(updatedUser)
+    res.status(200).json(updatedUser)
   } else {
     res.status(404).json({
       message: "User not found to update"
@@ -80,7 +103,7 @@ server.delete("/users/:id", (req, res) => {
 
     res.status(204).end()
   }else {
-    res.status(404).json({message: "User not found"})
+    res.status(404).json({message: "The user with the specified ID does not exist."})
   }
 
 })
